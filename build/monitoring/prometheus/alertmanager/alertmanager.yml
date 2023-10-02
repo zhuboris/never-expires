@@ -1,0 +1,24 @@
+route:
+  receiver: 'default-receiver'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 2h
+  group_by: [cluster, alertname]
+
+receivers:
+  - name: 'default-receiver'
+    slack_configs:
+      - api_url_file: 'slack_url'
+        channel: '#alerts'
+        username: 'Alertmanager'
+        text: "<!channel> :alert: *Alert:* `{{ .Labels.alertname }}`\n*Description:* {{ .Annotations.description }}\n*Severity:* `{{ .Labels.severity }}`\n*Instance:* `{{ .Labels.instance }}`\n*Duration:* {{ .Labels.for }}\n<{{ .GeneratorURL }}|View Dashboard>"
+    telegram_configs:
+      - bot_token_file: 'telegram_token'
+        chat_id: -905012461
+        message: |
+          🚨 *Alert:* `{{ .Labels.alertname }}`
+          *Description:* {{ .Annotations.description }}
+          *Severity:* `{{ .Labels.severity }}`
+          *Instance:* `{{ .Labels.instance }}`
+          *Duration:* {{ .Labels.for }}
+          [🔗 View Dashboard]({{ .GeneratorURL }})

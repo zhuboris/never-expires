@@ -1,0 +1,184 @@
+{
+  "register": {
+    "subject": {
+      "en": "Welcome to Never Expires!",
+      "ru": "Добро пожаловать в Never Expires!"
+    },
+    "header": {
+      "en": "Your Food Thanks You: It'll Never Expires Now!",
+      "ru": "Ваша Еда Благодарит Вас: Теперь Она Никогда Не Испортится!"
+    },
+    "body": {
+      "en": "Thanks for joining Never Expires! We're excited to help you organize your fridge and reduce waste.",
+      "ru": "Спасибо за регистрацию в Never Expires! Мы рады помочь вам организовать холодильник и сократить потери."
+    },
+    "click_suggestion": {
+      "en": "Click the button below to confirm your email and get started.",
+      "ru": "Нажмите кнопку ниже, чтобы подтвердить ваш email и начать работу."
+
+    },
+    "button": {
+      "en": "Confirm Email",
+      "ru": "Подтвердить Почту"
+    }
+  },
+  "confirm_email": {
+    "subject": {
+      "en": "Email Confirmation Request",
+      "ru": "Запрос на Подтверждение Электронной Почты"
+    },
+    "header": {
+      "en": "Email Confirmation Request",
+      "ru": "Запрос на Подтверждение Электронной Почты"
+    },
+    "body": {
+      "en": "You're one step away from fully activating your account.",
+      "ru": "Вам остался всего один шаг до полной активации вашего аккаунта."
+    },
+    "click_suggestion": {
+      "en": "Complete the registration process by confirming your email address with the button below.",
+      "ru": "Завершите процесс регистрации, подтвердив ваш адрес электронной почты кнопкой ниже."
+
+    },
+    "button": {
+      "en": "Confirm Email",
+      "ru": "Подтвердить Почту"
+    }
+  },
+  "new_password": {
+    "subject": {
+      "en": "Your New Password",
+      "ru": "Ваш новый пароль"
+    },
+    "header": {
+      "en": "Your password has been reset",
+      "ru": "Ваш пароль был сброшен"
+    },
+    "body": {
+      "en": "The password for your Never Expires account has been successfully reset. If you did not initiate this change, please contact our support team immediately.",
+      "ru": "Пароль вашего аккаунта в Never Expires успешно сброшен. Если вы не инициировали это изменение, немедленно свяжитесь с нашей службой поддержки."
+    },
+    "form": {
+      "en": "New password:",
+      "ru": "Новый пароль:"
+    }
+  },
+  "reset_password": {
+    "subject": {
+      "en": "Password Reset Instructions",
+      "ru": "Инструкции по Сбросу Пароля"
+    },
+    "header": {
+      "en": "Did You Forget Your Password?",
+      "ru": "Забыли пароль?"
+    },
+    "body": {
+      "en": "Looks like you've forgotten your password.",
+      "ru": "Похоже, вы забыли ваш пароль."
+    },
+    "click_suggestion": {
+      "en": "To reset it click the button below and you will receive a new password in the following email.",
+      "ru": "Чтобы сбросить его нажмите кнопку ниже, и в следующем письме вы получите новый пароль."
+
+    },
+    "button": {
+      "en": "Reset Password",
+      "ru": "Сбросить Пароль"
+    }
+  },
+  "change_email": {
+    "subject": {
+      "en": "New Email Confirmation",
+      "ru": "Подтверждение Новой Электронной Почты"
+    },
+    "header": {
+      "en": "New Email Confirmation",
+      "ru": "Подтверждение Новой Электронной Почты"
+    },
+    "body": {
+      "en": "You have successfully changed the email address associated with your Never Expires account.",
+      "ru": "Вы успешно изменили адрес электронной почты, связанный с вашим аккаунтом в Never Expires."
+    },
+    "click_suggestion": {
+      "en": "Please confirm your new email by clicking the button below.",
+      "ru": "Пожалуйста, подтвердите ваш новый email, нажав на кнопку ниже."
+
+    },
+    "button": {
+      "en": "Confirm Email",
+      "ru": "Подтвердить Почту"
+    }
+  },
+  "new_device": {
+    "subject": {
+      "en": "New Device Login Alert",
+      "ru": "Оповещение о Входе с Нового Устройства"
+    },
+    "header": {
+      "en": "New Device Login Alert",
+      "ru": "Оповещение о Входе с Нового Устройства"
+    },
+    "body": {
+      "en": "We noticed that you've logged in from a new device. For your security, please review the details below. If you did not initiate this login, please change your password immediately.",
+      "ru": "Мы заметили, что вы вошли в систему с нового устройства. Для вашей безопасности, пожалуйста, ознакомьтесь с деталями ниже. Если это не вы, смените пароль как можно скорее."
+    },
+    "time_row": {
+      "en": "Login time",
+      "ru": "Время входа"
+    },
+    "device_row": {
+      "en": "Device",
+      "ru": "Устройство"
+    },
+    "ip_address_row": {
+      "en": "IP address",
+      "ru": "IP адрес"
+    }
+  },
+  "google_connection": {
+    "subject": {
+      "en": "Google Account Connection Alert",
+      "ru": "Оповещение о Подключении Аккаунта Google"
+    },
+    "header": {
+      "en": "Google Account is connected",
+      "ru": "Аккаунт Google подключен"
+    },
+    "body": {
+      "en": "Good news! We detected a login with your email using Google Sing In and we've connected it to your existing account. If you did not initiate this login, please contact with support.",
+      "ru": "Хорошие новости! Мы заметили, что вы вошли в систему по своему email с помощью Google Sing In и мы подключили его к вашему существующему аккаунту. Если это не вы, пожалуйста, свяжитесь со службой поддержки."
+    }
+  },
+  "apple_connection": {
+    "subject": {
+      "en": "Apple ID Connection Alert",
+      "ru": "Оповещение о Подключении Apple ID"
+    },
+    "header": {
+      "en": "Apple ID is connected",
+      "ru": "Apple ID подключен"
+    },
+    "body": {
+      "en": "Good news! We detected a login with your email using Apple Sing In and we've connected it to your existing account. If you did not initiate this login, please contact with support.",
+      "ru": "Хорошие новости! Мы заметили, что вы вошли в систему по своему email с помощью Apple Sing In и мы подключили его к вашему существующему аккаунту. Если это не вы, пожалуйста, свяжитесь со службой поддержки."
+    }
+  },
+  "changed_password": {
+    "subject": {
+      "en": "Your password has been changed",
+      "ru": "Ваш пароль был изменен"
+    },
+    "header": {
+      "en": "Your password has been changed",
+      "ru": "Ваш пароль был изменен"
+    },
+    "body": {
+      "en": "We're sending this email to notify you that your password has been changed. If you didn't initiate this change please reset it immediately.",
+      "ru": "Мы отправляем это сообщение, чтобы сообщить вам, что ваш пароль был изменен. Если вы не инициировали это изменение пожалуйста немедленно сбросьте его."
+    }
+  },
+  "annotation": {
+    "en": "If you received this email by mistake please ignore it",
+    "ru": "Если вы получили это письмо по ошибке пожалуйста просто проигнорируйте его"
+  }
+}

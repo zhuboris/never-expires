@@ -1,0 +1,10 @@
+inpackage: True
+filename: "mock_{{.InterfaceName}}_test.go"
+with-expecter: True
+all: True
+dir: "{{.InterfaceDir}}"
+
+packages:
+  github.com/asborisjuas/never-expires/internal/reminder/storage:
+  github.com/asborisjuas/never-expires/internal/reminder/item:
+  github.com/asborisjuas/never-expires/internal/reminder/apn:

@@ -1,0 +1,22 @@
+issues:
+  exclude-rules:
+    - path: .*
+      linters:
+        - errcheck
+      text: "Error return value of `.*Sync` is not checked"
+    - path: .*
+      linters:
+        - errcheck
+      text: "Error return value of `.*Quit` is not checked"
+    - path: .*
+      linters:
+        - errcheck
+      text: "Error return value of `.*Rollback` is not checked"
+    - path: .*
+      linters:
+        - errcheck
+      text: "Error return value of `.*recordTimeMetric` is not checked"
+    - path: .*
+      linters:
+        - unused
+      text: 'func .*\.makeChannel` is unused'

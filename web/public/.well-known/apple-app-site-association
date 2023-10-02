@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "VW4LP7Z3CE.ru.fridge.app",
+        "paths": [
+          "NOT /privacy-policy*",
+          "NOT /images/*",
+          "*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "VW4LP7Z3CE.ru.fridge.app"
+    ]
+  }
+}

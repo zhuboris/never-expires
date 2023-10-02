@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3.12.4-management-alpine
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_config:/etc/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    env_file:
+      - ../../build/emailsender/rabbitmq/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+
+  email_sender:
+    build:
+      context: ../..
+      dockerfile: build/emailsender/api/Dockerfile
+    env_file:
+      - ../../build/emailsender/api/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_config:
+  rabbitmq_logs:
+
+networks:
+  nginx_ednetwork:
+    external: true

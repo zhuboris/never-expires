@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  idapi:
+    build:
+      context: ../..
+      dockerfile: ../../build/id/api/Dockerfile
+    volumes:
+      - ./logs:/root/Logs
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    env_file:
+      - ../../build/id/api/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+    depends_on:
+      - db_auth
+
+  db_auth:
+    build:
+      context: ../../build/id/postgresql
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    env_file:
+      - ../../build/id/postgresql/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+
+networks:
+  nginx_ednetwork:
+    external: true

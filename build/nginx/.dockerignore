@@ -1,0 +1,3 @@
+.gitignore
+../../deployments/nginx/docker-compose.yml
+nginx

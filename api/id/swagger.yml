@@ -1,0 +1,782 @@
+openapi: 3.0.3
+info:
+  title: Authentication API
+  description: |
+    <b>Base URL:</b> <code>https://id.never-expires.com/</code><br>
+
+    Error Handling
+    API can run into two types of errors while processing a request: request acceptance errors and request processing errors:<br>
+    If a request fails at the acceptance stage, API will return an HTTP response without a body. The response will include one of the following HTTP status codes:<br><br>
+    
+    • <b>401 Unauthorized:</b> This status is returned when the request lacks valid authentication credentials for the target resource<br>
+    • <b>404 Not Found:</b> Requested resource could not be found on the server<br>
+    • <b>405 Method Not Allowed:</b> Request method is known by the server but is not supported by the target resource<br>
+    • <b>408 Request Timeout:</b> The API didn't complete the request within the expected time<br>
+    • <b>500 Internal Server Error:</b> The server failed the request due to an internal error<br><br>
+    
+    <b>If an error occurs during the processing of a request the API will return the HTTP 422 status code in the header.</b><br> The body of the response will contain a JSON object with two fields: an internal API error code and a message.<br>
+    The internal error code is a four-digit number. The first digit of the code indicates the category of the error, similar to HTTP status codes.<br>
+    The list of errors:<br><br>
+    
+    <b>1xxx: HTTP Request Forming Errors</b><br>
+    • <b>1001 InvalidJSONBody:</b> Required fields cannot be extracted from the request body<br>
+    • <b>1002 UnexistingHTTPMethod:</b> The method specified in the request does not exist<br>
+    • <b>1003 MissingParameter:</b> The request is missing a required parameter (can occur both in the body and in the URL)<br><br>
+    
+    <b>2xxx: Authentication Errors</b><br>
+    • <b>2001 EmailAlreadyRegistered:</b> A registration attempt is made with an email that is already registered<br>
+    • <b>2002 WrongLoginData:</b> Provided email or password is incorrect during a login attempt<br>
+    • <b>2003 WrongPassword:</b> An incorrect password is entered, typically occurs when the user is confirming an account modification<br>
+    • <b>2004 EmailAlreadyConfirmed:</b> An attempt is made to verify an email that is already verified<br>
+    • <b>2005 EmailIsNotConfirmed:</b> Requested an action that required user having confirmed email but he did not confirmed it<br>
+    • <b>2006 EmailIsChangedOrNotConfirmed:</b> Owner of the email address  token currently has other active email or his email is not confirmed<br>
+    • <b>2007 EmailIsNotBelongToAnyUser:</b> Email to send restoration password link does not belong to any user<br>
+    • <b>2008 UserNotExists:</b> Authenticated user not registered<br><br>
+    
+    <b>3xxx: Data Validation Errors</b><br>
+    • <b>3001 InvalidEmail:</b> An attempt is made to add an email address that does not have a suitable format<br>
+    • <b>3002 InsecurePassword:</b> The server can't accept the password created because it's not strong enough. The specific reason is provided in the error message<br>
+  version: 0.1.0
+servers:
+    - url: 'https://id.never-expires.com'
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      description: >
+        A new user is register by email and password. It verifies email to be unique and valid and password to be strong enough.<br>
+        Request also contains optional 'username' field. If username is empty it will be set as part of email before @.<br><br>
+        On success it sends confirmation mail to provided email.<br>
+        If user did not receive email or confirmation link was expired, there is an endpoint to send a new one.<br><br>
+      operationId: register
+
+      requestBody:
+        description: A JSON object containing the required email and password and optional username.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                username:
+                  type: string
+
+      security: []
+      responses:
+        201:
+          description: Successfully registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2001 EmailAlreadyRegistered, 3001 InvalidEmail, 3002 InsecurePassword, 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /login:
+    post:
+      summary: Authenticates a user and returns user information
+      description: |
+        This endpoint authenticates a user using email and password.<br>
+        If the authentication is successful, it returns information about the authenticated user. Also returns his auth tokens and session id, setting authentication cookies with same data.
+      operationId: login
+
+      requestBody:
+        description: A JSON object containing the email and password.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+
+      security: []
+      responses:
+        200:
+          description: >
+            Successfully authenticated.<br>
+            Returning a user object in response body body.<br>
+            'access-jwt', 'refresh-jwt' and 'session-id' cookies are added.<br>
+            'access-jwt' is required for auth.<br>
+            'refresh-jwt' and 'session-id' are required for refreshing access token.
+          headers:
+            Set-Cookie:
+              description: Add tokens and sessionID
+              schema:
+                type: string
+              example: "access-jwt=value1; Path=/; HttpOnly; refresh-jwt=value2; Path=/; HttpOnly; session-id=value3; Path=/; HttpOnly"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/AuthData'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2002 WrongLoginData, 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /login/google/ios:
+    post:
+      summary: Exchanges idToken with user data for login with Google oAuth2 from iOS app
+      description: >
+        This endpoint verifies idToken given from client and returns same JSON as /login on success. If token invalid returns 401.
+      operationId: loginGoogleIOs
+
+      security: [ ]
+      requestBody:
+        description: A JSON object containing id_token.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token_string
+              properties:
+                token_string:
+                  type: object
+                  required:
+                    - id_token
+                  properties:
+                    id_token:
+                      type: string
+      responses:
+        200:
+          description: >
+            Successfully authenticated.<br>
+            Returning a user object in response body body.<br>
+            'access-jwt', 'refresh-jwt' and 'session-id' cookies are added.<br>
+            'access-jwt' is required for auth.<br>
+            'refresh-jwt' and 'session-id' are required for refreshing access token.
+          headers:
+            Set-Cookie:
+              description: Add tokens and sessionID
+              schema:
+                type: string
+              example: "access-jwt=value1; Path=/; HttpOnly; refresh-jwt=value2; Path=/; HttpOnly; session-id=value3; Path=/; HttpOnly"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  is_email_confirmed:
+                    type: boolean
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  session_id:
+                    type: string
+        401:
+          description: Access denied because idToken is invalid.
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /login/apple/ios:
+    post:
+      summary: Exchanges idToken with user data for login with Apple sign in from iOS app
+      description: >
+        This endpoint verifies idToken given from client and returns same JSON as /login on success. If token invalid returns 401.
+      operationId: loginAppleIOs
+
+      security: [ ]
+      requestBody:
+        description: A JSON object containing id_token.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token_string
+              properties:
+                token_string:
+                  type: object
+                  required:
+                    - id_token
+                  properties:
+                    id_token:
+                      type: string
+      responses:
+        200:
+          description: >
+            Successfully authenticated.<br>
+            Returning a user object in response body body.<br>
+            'access-jwt', 'refresh-jwt' and 'session-id' cookies are added.<br>
+            'access-jwt' is required for auth.<br>
+            'refresh-jwt' and 'session-id' are required for refreshing access token.
+          headers:
+            Set-Cookie:
+              description: Add tokens and sessionID
+              schema:
+                type: string
+              example: "access-jwt=value1; Path=/; HttpOnly; refresh-jwt=value2; Path=/; HttpOnly; session-id=value3; Path=/; HttpOnly"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  is_email_confirmed:
+                    type: boolean
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  session_id:
+                    type: string
+        401:
+          description: Access denied because idToken is invalid.
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user:
+    get:
+      summary: Get information about authorized user
+      description: Get user email, username and if the email is confirmed by id from assess token
+      tags:
+        - Auth
+      operationId: getUser
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        200:
+          description: |
+            Successful response with JSON with user data: username, email, is_email_confirmed fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: No token was provided with existing user id
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+    delete:
+      summary: Deletes user's account
+      description: |
+        Deletes authorized user's account completely without possibility of recovery.
+        If user signed in with apple id it also revokes apple auth.
+      tags:
+        - Auth
+      operationId: deleteUser
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        204:
+          description: Successfully deleted
+        401:
+          description: No token was provided with existing user id
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /refresh:
+    post:
+      summary: Refreshing access token by params from body or cookies
+      description: |
+        Verifies that refresh token is valid and that this session was started from same device as this request was done.<br>
+        If request cookies also contain previous access token it verifies that it is valid and that both tokens are belong to one user.<br>
+        if the verification is successful a new access token is sent in body and cookies. Otherwise all auth cookies will be deleted.<br><br>
+        
+        Request must contain refresh token and session id in JSON body or in cookies.
+      operationId: refreshJWT
+
+      security:
+        - refreshTokenCookie: [ ]
+          sessionIDCookie: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: May not be included in the request if there are needed auth cookies.
+              required:
+                - refresh_token
+                - session_id
+              properties:
+                refresh_token:
+                  type: string
+                session_id:
+                  type: string
+      responses:
+        200:
+          description: >
+            Successfully refreshed access token, added or updated 'access-jwt' cookie.
+          headers:
+            Set-Cookie:
+              description: Contains new 'access-jwt' cookie with old 'refresh-jwt' and 'session-id' cookies.
+              schema:
+                type: string
+              example: "access-jwt=newValue1; Path=/; HttpOnly; refresh-jwt=oldValue2; Path=/; HttpOnly; session-id=oldValue2; Path=/; HttpOnly"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        401:
+          description: Access denied. Either some token is invalid or the session was started on other device.
+          headers:
+            Set-Cookie:
+              description: Clear the auth cookies values.
+              schema:
+                type: string
+              example: "access-jwt=; Path=/; HttpOnly; refresh-jwt=; Path=/; HttpOnly; session-id=; Path=/; HttpOnly"
+        405:
+          description: HTTP method is not allowed
+        500:
+          description: Unexpected server error
+
+  /logout:
+    delete:
+      summary: Log out current user
+      description: It doesn't matter if the user is logged in or not. All auth cookies will be deleted.
+      operationId: logout
+
+      security: [ ]
+      responses:
+        200:
+          description: Delete auth cookies.
+          headers:
+            Set-Cookie:
+              description: Clear the auth cookies values and make them expired.
+              schema:
+                type: string
+              example: "access-jwt=; Path=/; HttpOnly; refresh-jwt=; Path=/; HttpOnly; session-id=; Path=/; HttpOnly"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        405:
+          description: HTTP method is not allowed
+
+  /user/password/change:
+    patch:
+      tags:
+        - Auth
+      summary: Change authorized user's password
+      description: |
+        Accept the current and new passwords. If the old one is correct and the new is strong enough changes are applied. Also deletes all auth cookies to log out on success.<br>
+        Creates new session and returns its auth data on success.
+      operationId: userPasswordChange
+
+      requestBody:
+        description: A JSON object containing the current and new passwords.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+              properties:
+                current_password:
+                  type: string
+                new_password:
+                  type: string
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        200:
+          description: Successfully changed password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthData'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2003 WrongPassword, 3002 InsecurePassword, 1001 InvalidJSONBody, 1003 MissingParameter, 2008 UserNotExists, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/email/change:
+    patch:
+      tags:
+        - Auth
+      summary: Change authorized user's email
+      description: >
+        Accept the current password and new email.<br>
+        Email must not be ever used by any user.
+        If the password is correct and the new email is valid changes are applied. Also deletes all auth cookies to log out on success.<br>
+        On success it sends confirmation mail to provided email. If user did not receive email or confirmation link was expired, there is an endpoint to send a new one.<br>
+      operationId: userEmailChange
+
+      requestBody:
+        description: A JSON object containing new email and the password.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_email
+                - password
+              properties:
+                new_email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        200:
+          description: Successfully changed email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2003 WrongPassword, 2001 EmailAlreadyRegistered, 3001 InvalidEmail, 1001 InvalidJSONBody, 1003 MissingParameter, 2008 UserNotExists, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/username/change:
+    patch:
+      tags:
+        - Auth
+      summary: Change authorized user's username
+      description: Changes username to provided one
+      operationId: userUsernameChange
+
+      requestBody:
+        description: A JSON object containing new username.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_username
+              properties:
+                new_username:
+                  type: string
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        200:
+          description: Successfully changed username
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1001 InvalidJSONBody, 1003 MissingParameter, 2008 UserNotExists, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/email/send-confirmation:
+    post:
+      tags:
+        - Auth
+      summary: Accepting request to send confirmation email
+      operationId: sendConfirmationEmail
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        202:
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2004 EmailAlreadyConfirmed,, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/email/confirm:
+    get:
+      summary: Email confirmation
+      description: Confirm email if token from query is valid and not expired
+      operationId: confirmEmail
+
+      security:
+        - confirmEmailToken: []
+      responses:
+        302:
+          description: Request processed successfully and redirected to page with result status.
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1003 MissingParameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        405:
+          description: HTTP method is not allowed
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/password/send-reset-email:
+    post:
+      summary: Accepting request to send email for resetting password.
+      description: |
+        If email is not registered or not confirmed it will return error code.<br>
+        On success it sends email with link to reset password. On click he will receive a new password in next email.
+      operationId: sendPwRestorationEmail
+
+      requestBody:
+        required: true
+        description: A JSON object containing email to send restoration link.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+
+      security:
+        - accessTokenCookie: [ ]
+        - authorizationHeader: [ ]
+      responses:
+        202:
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 2007 EmailIsNotBelongToAnyUser, 2005 EmailIsNotConfirmed, 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /user/password/reset:
+    post:
+      summary: Change password to token owner
+      description: Validates a password reset token. If the token is valid,
+        validates new password. Checks that email owner did not change address and it was confirmed. If password is strong enough applies change.<br>
+        On success logout and delete all auth cookies.
+      operationId: postPasswordRestoration
+
+      requestBody:
+        description: A JSON object containing a new password and validation token.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_password
+                - token
+              properties:
+                new_password:
+                  type: string
+                token:
+                    type: string
+
+      security: [ ]
+      responses:
+        302:
+          description: Redirected to page with operation result
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1001 InvalidJSONBody, 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+components:
+  securitySchemes:
+    authorizationHeader:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: > 
+        Can have format 'Bearer {token}' or just '{token}'
+    accessTokenCookie:
+      type: apiKey
+      in: cookie
+      name: access-jwt
+    refreshTokenCookie:
+      type: apiKey
+      in: cookie
+      name: refresh-jwt
+    sessionIDCookie:
+      type: apiKey
+      in: cookie
+      name: session-id
+    confirmEmailToken:
+      type: apiKey
+      in: query
+      name: token
+
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        is_email_confirmed:
+          type: boolean
+    AuthData:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        session_id:
+          type: string
+    SuccessMessage:
+      type: object
+      properties:
+        success:
+          type: string
+    ErrorMessage:
+      description: Contains the internal status code and a message
+      type: object
+      properties:
+        status_code:
+          type: integer
+        error:
+          type: string

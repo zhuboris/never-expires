@@ -1,0 +1,844 @@
+openapi: 3.0.3
+info:
+  title: Never Expires
+  description: |
+    <b>Reminder API</b><br>
+    
+    <b>Base URL:</b> <code>https://reminder.never-expires.com/</code><br>
+    
+    Error Handling
+    API can run into two types of errors while processing a request: request acceptance errors and request processing errors:<br>
+    If a request fails at the acceptance stage, API will return an HTTP response without a body. The response will include one of the following HTTP status codes:<br><br>
+    
+    • <b>401 Unauthorized:</b> This status is returned when the request lacks valid authentication credentials for the target resource<br>
+    • <b>404 Not Found:</b> Requested resource could not be found on the server<br>
+    • <b>405 Method Not Allowed:</b> Request method is known by the server but is not supported by the target resource<br>
+    • <b>408 Request Timeout:</b> The API didn't complete the request within the expected time<br>
+    • <b>500 Internal Server Error:</b> The server failed the request due to an internal error<br><br>
+    
+    <b>If an error occurs during the processing of a request the API will return the HTTP 422 status code in the header.</b><br> The body of the response will contain a JSON object with two fields: an internal API error code and a message.<br>
+    The internal error code is a four-digit number. The first digit of the code indicates the category of the error, similar to HTTP status codes.<br>
+    The list of errors:<br><br>
+    
+    <b>1xxx: HTTP Request Forming Errors</b><br>
+    • <b>1001 InvalidJSONBody:</b> Required fields cannot be extracted from the request body<br>
+    • <b>1002 UnexistingHTTPMethod:</b> The method specified in the request does not exist<br>
+    • <b>1003 MissingParameter:</b> The request is missing a required parameter (can occur both in the body and in the URL)<br>
+    • <b>1004 InvalidUUID:</b> Given UUID is invalid<br>
+    • <b>1005 InvalidOption:</b> Requested option is not exists<br>
+    • <b>1006 InvalidQueryData:</b> Error with parsing query data to types: data is in a wrong type / format<br><br>
+    
+    <b>3xxx: Data Validation Errors</b><br>
+    • <b>3003 UUIDIsReserved:</b> The server can't create entity with given UUID because it is already taken<br><br>
+    
+    <b>4xxx: Items and storages read/write Errors</b><br>
+    • <b>4001 ItemNotFound:</b> The user does not own item with requested id<br>
+    • <b>4002 StorageNotFound:</b> The user does not own storage with requested id<br>
+    • <b>4003 StorageNameAlreadyExists:</b> User already has storage with given name<br>
+    • <b>4004 DeletingNotAllowed:</b> Attempt to delete default user's storage, it is forbidden<br><br>
+  version: 0.0.1
+servers:
+  - url: 'https://reminder.never-expires.com'
+paths:
+  /items:
+    get:
+      tags:
+        - items
+      summary: Sorted array of all items with filters
+      description: | 
+        Items are sorted by expiration date asc and name desc. Array can be empty in success response if there are no match.<br>
+        Filters are added in query. Available filter options: by date, by name starting, by opened status.
+      operationId: getItems
+      parameters:
+        - name: storage-id
+          in: query
+          required: false
+          description: Returns items contains in the storage
+          schema:
+            type: string
+            format: uuid
+        - name: name-starting
+          in: query
+          required: false
+          description: Returns items with names starting with this parameter. Case is ignored.
+          schema:
+            type: string
+        - name: before-date
+          in: query
+          required: false
+          description: Returns items which expiration date is before inputted date. Expected date is in format "2006-01-02T15:04:05Z07:00" (RFC 3339).
+          schema:
+            type: string
+            format: 'date-time'
+        - name: is-opened
+          in: query
+          required: false
+          description: Returns items having selected opened status - opened(true) or not opened (false)
+          schema:
+            type: boolean
+
+      security:
+        - authorizationHeader: []
+        - accessTokenCookie: []
+      responses:
+        200:
+          description: Successfully completed request and returns sorted array with all matched items that can be empty
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1006 InvalidQueryData, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    post:
+      tags:
+        - items
+      summary: Add item. Not idempotent
+      description: Adding item to user's storage. Server sets its id and returns it with whole created item.
+      operationId: addItem
+      requestBody:
+        description: A JSON object with base info about item and storage to add it
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - storage_id
+                - date_added
+              properties:
+                storage_id:
+                  type: string
+                  format: uuid
+                date_added:
+                  type: string
+                  format: 'date-time'
+              allOf:
+                - $ref: '#/components/schemas/InputtedItem'
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4002 StorageNotFound, 1001 InvalidJSONBody, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /items/{id}:
+    post:
+      tags:
+        - items
+      summary: Add item. Same as POST /items but idempotent
+      description: Adding item to user's storage with item id from client
+      operationId: addItemWithID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: A JSON object with base info about item and storage to add it.
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - storage_id
+                - date_added
+              properties:
+                storage_id:
+                  type: string
+                  format: uuid
+                date_added:
+                  type: string
+                  format: 'date-time'
+              allOf:
+                - $ref: '#/components/schemas/InputtedItem'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 3003 UUIDIsReserved, 4002 StorageNotFound, 1001 InvalidJSONBody, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    get:
+      tags:
+        - items
+      summary: Get info about item by id
+      description: Matches id with ids of items belongs to active user. If id was not found returns error.
+      operationId: getItemByID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns found item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4001 ItemNotFound, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    put:
+      tags:
+        - items
+      summary: Update existing item
+      description: |
+        Matches id with ids of items belongs to active user. If id was not found returns error.<br>
+        Returns success even if data was same.
+      operationId: updateItemByID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: A JSON object with base info about item
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputtedItem'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns updated item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4001 ItemNotFound, 1001 InvalidJSONBody, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    delete:
+      tags:
+        - items
+      summary: Delete item by id
+      description: |
+        Matches id with ids of items belongs to active user. If it was deleted or was not found returns success code.
+      operationId: deleteItemByID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        204:
+          description: Successfully completed request
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /items/make-copy:
+    post:
+      tags:
+        - items
+      summary: Duplicate item by id
+      description: |
+        Making copy of item. Returns new item.<br>
+        Server will set new id.<br>
+      operationId: copyItem
+
+      requestBody:
+        description: A JSON object with id to copy and time
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemToCopy'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /items/make-copy/{new_id}:
+    post:
+      tags:
+        - items
+      summary: Duplicate item by id with new id
+      description: |
+        Making copy of item. Returns new item.<br>
+        New item id is provided by client<br>
+      operationId: copyItemWithID
+
+      parameters:
+        - in: path
+          name: new_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: A JSON object with id to copy and time
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemToCopy'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 3003 UUIDIsReserved, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /items/autocomplete-suggestions:
+    get:
+      tags:
+        - items
+      summary: Autocomplete data for item names
+      description: |
+        Return sorted array with suggested names. Array can be empty if there are no matches.<br>
+        Limit can be set from query or it will be 10 as default.
+      operationId: autocompleteItemNames
+
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /storages:
+    get:
+      tags:
+        - storages
+      summary: Sorted array of all storages belongs to authorized user
+      description: |
+        Storages are sorted by contained items count in desc. If user had no storages it creating defaults first and return them.
+      operationId: getStorages
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns sorted array with users storages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Storage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    post:
+      tags:
+        - storages
+      summary: Add storage. Not idempotent
+      description: Adding storage. Server sets its id and name if any of them was not provided.
+      operationId: addStorage
+      requestBody:
+        description: A JSON object with base info about storage
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputtedStorage'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added storage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Storage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4003 StorageNameAlreadyExists, 1001 InvalidJSONBody, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /storages/{id}:
+    post:
+      tags:
+        - storages
+      summary: Add storage. Same as POST /storages but idempotent
+      description: Adding storage with id from client. Name is generated on server side if it was not provided.
+      operationId: addStorageWithID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: A JSON object with base info about storage
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputtedStorage'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns added storage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Storage'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4003 StorageNameAlreadyExists, 1001 InvalidJSONBody, 3003 UUIDIsReserved, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    put:
+      tags:
+        - storages
+      summary: Update existing storage
+      description: |
+        Matches id with ids of storage belongs to active user. If id was not found returns error.<br>
+        Name must be unique for user, otherwise error error code will be returned.<br>
+        Returns success code even if data was same.
+      operationId: updateStorageByID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        required: true
+        description: A JSON object with base info about storage
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputtedStorage'
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        200:
+          description: Successfully completed request and returns updated storage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 4003 StorageNameAlreadyExists, 4002 StorageNotFound, 1001 InvalidJSONBody, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+    delete:
+      tags:
+        - storages
+      summary: Delete storage by id
+      description: |
+        Matches id with ids of storages belongs to active user.<br>
+        Has to options: delete the storage or all items belong to the storage. It is setting with "option" query.<br><br>
+        Delete option: Tries to delete storage belong to user. If it was deleted or was not found returns success code. Also attempt to delete default storage will cause an error.<br>
+        Clear option: Tries to clear storage, but if it was not found returns an error 4002 StorageNotFound. If it was empty already returns success code.<br>
+      operationId: deleteStorageByID
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - in: query
+          name: option
+          schema:
+            type: string
+            enum: [ delete, clear ]
+          required: true
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        204:
+          description: Successfully completed request
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1005 InvalidOption, 4002 StorageNotFound, 1003 MissingParameter, 1004 InvalidUUID, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: Token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+  /apns/device-token:
+    post:
+      tags:
+        - notification
+      summary: Add APNs device token to receive notifications
+      description: Connects device token with authorized user and enables notifications. Success if token is added or was added earlier. Returns error if token is missing
+      operationId: addAPNsDeviceToken
+
+      requestBody:
+        description: A JSON object with device token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+
+      security:
+        - authorizationHeader: [ ]
+        - accessTokenCookie: [ ]
+      responses:
+        204:
+          description: Device token is successfully added (or was added before)
+        422:
+          description: |
+            An API error occurred while processing the request. JSON contains an internal error status code describing the reason for the error and message.<br>
+            Expected internal codes: 1003 MissingParameter, 1002 UnexistingHTTPMethod.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        401:
+          description: JWT token is missing or invalid
+        408:
+          description: Timeout
+        500:
+          description: Unexpected server error
+
+components:
+  securitySchemes:
+    authorizationHeader:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Can have format 'Bearer {token}' or just '{token}'
+    accessTokenCookie:
+      type: apiKey
+      in: cookie
+      name: access-jwt
+
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+           type: string
+        is_opened:
+          type: boolean
+        best_before:
+          type: string
+          format: 'date-time'
+        expiration_date:
+          type: string
+          format: 'date-time'
+        hours_after_opening:
+          anyOf:
+            - type: integer
+            - type: "null"
+          description: if item cannot be opened contains null
+        date_added:
+          type: string
+          format: 'date-time'
+        note:
+          type: string
+          description: if empty contains empty string
+    Storage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        items_count:
+          type: integer
+        is_default:
+          type: boolean
+          description: default storage cannot be deleted
+    InputtedStorage:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    InputtedItem:
+      type: object
+      required:
+        - name
+        - best_before
+        - is_opened
+        - date_added
+      properties:
+        name:
+          type: string
+        best_before:
+          type: string
+          format: 'date-time'
+        is_opened:
+          type: boolean
+        hours_after_opening:
+          type: integer
+        note:
+          type: string
+    ItemToCopy:
+      type: object
+      required:
+        - original_id
+        - date_added
+      properties:
+        original_id:
+          type: string
+          format: uuid
+        date_added:
+          type: string
+          format: 'date-time'
+    ErrorMessage:
+      description: Contains the internal status code and a message
+      type: object
+      properties:
+        status_code:
+          type: integer
+        error:
+          type: string

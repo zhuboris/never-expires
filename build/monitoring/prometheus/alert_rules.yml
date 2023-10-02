@@ -1,0 +1,114 @@
+groups:
+  - name: services
+    rules:
+      - alert: InstanceDown
+        expr: up{job!="notification_sender"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes"
+
+  - name: node
+    rules:
+      - alert: HostOutOfMemory
+        expr: (node_memory_MemAvailable_bytes{job="node"} / node_memory_MemTotal_bytes{job="node"}) * 100 < 25
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of memory"
+          description: "Node memory is < 25% left\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      - alert: HostOutOfDiskSpace
+        expr: (100 - ((node_filesystem_avail_bytes{job="node",mountpoint="/"} * 100) / node_filesystem_size_bytes{job="node",mountpoint="/"}) < 20
+        for: 1s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of disk space"
+          description: "Disk is almost full: < 20% left\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      - alert: HostHighCpuLoad
+        expr: (sum by(instance) (irate(node_cpu_seconds_total{job="node", mode!="idle"}[5m])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{job="node"}[5m])))) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host high CPU load"
+          description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - name: blackbox
+    rules:
+      - alert: ProbeFail
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute."
+      - alert: TLSCertificateExpireSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 604800
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TLS Certificate Expiry Warning for {{ $labels.instance }}"
+          description: "The TLS certificate for {{ $labels.instance }} will expire in less than one week."
+
+  - name: api
+    rules:
+      - alert: ServerError
+        expr: sum by(endpoint) (increase(http_requests_total{code="5.."}[1m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Server response error"
+          description: "Received 5xx status code\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: LostConnectionToService
+        expr: |
+          {__name__=~".*_service_status"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API lost connection to service {{ $labels.__name__ }}"
+          description: "The service with metric name {{ $labels.__name__ }} has been down for more than 2 minutes."
+      - alert: APNsSenderDidNotActivated
+        expr: time() - apns_start_time_unix > 90000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "APNs sender did not start"
+          description: "APNs sender has not been activated in the last 25 hours"
+
+  - name: go_apps
+    rules:
+      - alert: HighGoroutinesCount
+        expr: go_goroutines{job=~"id_api|reminder_api"} > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of Goroutines in {{ $labels.instance }}"
+          description: "{{ $labels.instance }} has {{ $value }} Go routines running."
+      - alert: HighAverageGCDuration
+        expr: rate(go_gc_duration_seconds_sum{job=~"id_api|reminder_api"}[5m]) / rate(go_gc_duration_seconds_count{job=~"id_api|reminder_api"}[5m]) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High average GC duration in {{ $labels.instance }}"
+          description: "The average GC duration over the last 5 minutes in {{ $labels.instance }} is exceeding 0.2 seconds."
+      - alert: HighTotalGCTime
+        expr: sum(rate(go_gc_duration_seconds_sum{job=~"id_api|reminder_api"}[5m])) by (instance) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High total GC time in {{ $labels.instance }}"
+          description: "The total GC time over the last 5 minutes in {{ $labels.instance }} is exceeding 2 seconds."

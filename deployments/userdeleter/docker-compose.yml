@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  idapi:
+    build:
+      context: ../..
+      dockerfile: ../../build/id/userdeleter/Dockerfile
+    volumes:
+      - ./logs_api:/root/Logs
+      - ./logs_cron:/var/log
+    env_file:
+      - ../../build/id/userdeleter/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+
+networks:
+  nginx_ednetwork:
+    external: true

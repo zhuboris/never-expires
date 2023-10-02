@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  notification_sender:
+    build:
+      context: ../..
+      dockerfile: build/reminder/apns/sender/Dockerfile
+    volumes:
+      - ./logs_apns:/root/Logs
+      - ./logs_cron:/var/log
+      - ./metrics:/root/metrics
+    env_file:
+      - ../../build/reminder/api/.env
+      - ../../build/reminder/apns/sender/.env
+    networks:
+      - nginx_ednetwork
+    profiles:
+      - apns
+
+  redis_db:
+    image: redis:7.2.1-alpine
+    volumes:
+      - ../../build/reminder/apns/redis_config:/etc/redis/redis_config:ro
+      - ./data_redis:/data
+    command: ["redis-server", "/etc/redis/redis_config/redis.conf"]
+    networks:
+      - nginx_ednetwork
+    profiles:
+      - apns
+
+  cron:
+    build:
+      context: ../../build/reminder/apns/cron
+      dockerfile: Dockerfile
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    network_mode: none
+
+networks:
+  nginx_ednetwork:
+    external: true

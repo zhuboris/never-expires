@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  reminder:
+    build:
+      context: ../..
+      dockerfile: build/reminder/api/Dockerfile
+    volumes:
+      - ./logs_reminder:/root/Logs
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    env_file:
+      - ../../build/reminder/api/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+    depends_on:
+      - db_reminder
+  db_reminder:
+    build:
+      context: ../../build/reminder/postgresql
+      dockerfile: Dockerfile
+    volumes:
+      - ./data_reminder:/var/lib/postgresql/data
+    env_file:
+      - ../../build/reminder/postgresql/.env
+    networks:
+      - nginx_ednetwork
+    restart: unless-stopped
+networks:
+  nginx_ednetwork:
+    external: true

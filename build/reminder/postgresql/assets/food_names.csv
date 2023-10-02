@@ -1,0 +1,473 @@
+potatoes,картофель
+beer,пиво
+crackers,крекеры
+bread white,хлеб белый
+bun,булка
+bread,хлеб
+bread rye,хлеб ржаной
+bread wholemeal,хлеб цельнозерновой
+bread toasted,хлеб тостовый
+croissant,круассан
+sandwich,бутерброд
+crackers,крекеры
+crispbreads,хлебцы
+bread sticks,хлебные палочки
+croutons,сухарики
+cornbread,хлеб кукурузный
+ciabatta,чиабатта
+pitta bread,пита
+baguette,багет
+brioche,бриошь
+challah,хала
+bread brown,хлеб черный
+focaccia,фокачча
+vinegar,уксус
+eggs,яйца
+raisins,изюм
+olives,оливки
+apples,яблоки
+strawberries,клубника
+apricots,абрикосы
+pineapple,ананас
+bananas,бананы
+blueberries,черника
+currants,смородина
+redcurrants,смородина красная
+blackcurrants,смородина чёрная
+bilberries,черника
+cow-berries,брусника
+blackberries,ежжевика
+lemon,лимон
+cranberries,клюква
+grapes,виноград
+raspberries,малина
+grapefruit,грейпфрут
+cherries,вишня
+gooseberries,крыжовник
+mandarins,мандарины
+melon,дыня
+pears,груши
+peaches,персики
+plums,сливы
+oranges,апельсины
+apple sauce,яблочное пюре
+dates,финики
+dried fruits,сухофрукты
+prunes,чернослив
+figs,инжир
+coconut,кокос
+plantain,плантан
+avocado,авокадо
+guava,гуава
+limes,лаймы
+mango,манго
+papaya,папайя
+pomegranate,гранат
+kiwi,киви
+persimmon,хурма
+passion fruit,маракуйя
+lychees,личи
+kumquat,кумкват
+watermelon,арбуз
+nectarines,нектарины
+carambola,карамбола
+coconut milk,кокосовое молоко
+cranberry,клюквенный
+biscuit,галета
+cookies,печенье
+cake,кекс
+pie,пирог
+tarts,тарталетки
+macaroons,пирожные
+donut,пончик
+flan,флан
+meringue,безе
+muesli,мюсли
+waffles,вафли
+strudel,штрудель
+cheesecake,чизкейк
+gateau,торт
+shortbread,печенье песочное
+energy bar,энергетический батончик
+eclair,жареный эклер
+brownie,брауни
+bar,батончик
+cup cake,капкейк
+fritter,банановые
+gingerbread,пряники
+cake chocolate,торт шоколадный
+cake apple,кекс яблочный
+cake chocolate,кекс шоколадный
+carrot cake,торт морковный
+banana bread,хлеб банановый
+pasta,паста
+macaroni,макароны
+spaghetti,спагетти
+rice,рис
+semolina,манная крупа
+flour rice,мука рисовая
+vermicelli,вермишель
+flour buckwheat,мука гречневая
+barley,ячмень
+oatmeal,овсянка
+cornstarch,крахмал кукурузный
+blancmange,бланманже
+flour rye,мука ржаная
+tapioca,тапиока
+flour wheat,мука пшеничная
+flour,мука
+starch potato,крахмал картофельный
+gelatin,желатин
+rice white,рис белый
+flour cassava,мука кассавы
+cornmeal,мука кукурузная
+rice brown,рис коричневый
+millet,просо
+flour soy,мука соевая
+bread crumbs,сухари
+bulgur,булгур
+buckwheat groats,гречневая крупа
+couscous,кускус
+pizza,пицца
+porridge,каша
+cornflakes,хлопья кукурузные
+tortellini,тортеллини
+pita,лаваш
+bran,отруби
+quinoa,киноа
+noodles,лапша
+endive,эндивий
+asparagus,спаржа
+eggplant,баклажан
+beetroot,свекла
+celery,сельдерей
+cauliflower,капуста цветная
+kale,капуста листовая
+mushrooms,грибы
+chanterelles,лисички
+cabbage,капуста
+cabbage chinese,китайская капуста
+peas,горох
+cabbage green,зеленая капуста
+celeriac,сельдерей
+cucumber,огурцы
+swede,брюква
+kohlrabi,кольраби
+sweet pepper green,перец сладкий зеленый
+pepper,перец
+beans,бобы
+onions,лук
+leek,лук-порей
+turnip,репа
+rhubarb,ревень
+cabbage red,капуста красная
+salad,салат
+chard,мангольд
+kidney bean,фасоль
+spinach,шпинат
+brussels sprouts,капуста брюссельская
+tomatoes,помидоры
+chicory,цикорий
+cabbage white,капуста белая
+carrot,морковь
+cabbage sauerkraut,капуста квашеная
+vegetable mix,смесь овощей
+radish,редис
+arugula,рукола
+gherkins,корнишоны
+pickles,огурцы маринованные
+mushroom tinned,грибы консервированные
+tomato puree,томатная паста
+silver‐skin onion,лук серебристый
+nightshade,паслен
+mustard,горчица
+amaranth,амаранта
+beans long,фасоль стручковая
+pumpkin,тыква
+garlic,чеснок
+dill,укроп
+sweet pepper red,перец сладкий красный
+broccoli,брокколи
+courgettes raw,цуккини
+beans French,фасоль французская
+iceberg lettuce,салат айсберг
+seaweed kelp,водоросли ламинария
+seaweed,водоросли
+seaweed agar agar,водоросли агар-агар
+tomatoes tinned,помидоры консервированные
+chili pepper,чили перец
+tomato cherry raw,помидоры черри
+sweet pepper yellow,перец сладкий желтый
+sweetcorn,кукуруза
+sweet pepper orange,перец сладкий оранжевый
+seaweed nori,водоросли нори
+jerusalem artichoke,топинамбур
+peanut butter,арахисовая паста
+tahini,тахани
+hummus,хумус
+nut paste,ореховая паста
+sauce barbecue,соус барбекю
+sauce cocktail,соус коктейльный
+mayonnaise,майонез
+piccalilli,пиккалилли
+ketchup,кетчуп
+ketchup tomato,кетчуп томатный
+ketchup hot chilli,кетчуп острый чили
+ketchup curry,кетчуп карри
+peanut sauce,соус арахисовый
+tomato sauce,соус томатный
+pesto,песто
+cheese sauce,соус сырный
+vinaigrette,винегрет
+garlic sauce,соус чесночный
+salsa sauce,сальса
+soy sauce,соус соевый
+chilli sauce,соус чилли
+aioli,айоли
+guacamole,гуакамоле
+tzatziki,дзадзики
+curry sauce,соус карри
+crisps,чипсы
+potato crisps,чипсы картофельные
+biscuits salted,крекеры соленые
+pretzel sticks,крендель
+sausage,колбаса
+weenies,сосиски
+frankfurters,сосиски франкфуртские
+ragout,рагу
+rolls,роллы
+popcorn,попкорн
+nuggets,наггетсы
+tortilla chips,чипсы кукурузные
+chicken sticks,куриные палочки
+meatballs,фрикадельки
+sushi,суш
+cheese,сыр
+cheese Swiss,сыр Швейцарский
+cheese Edam,сыр Эдам
+cheese Gouda,сыр Гауда
+cheese Camembert,сыр Камамбер
+cheese Brie,сыр Бри
+cheese cottage,сырный творог
+cheese Roquefort,сыр Рокфор
+cheese Saint-Paulin,сыр Сен-Полен
+cheese Parmesan,сыр Пармезан
+cheese cream,сливочный сыр
+cheese Limburger,сыр Лимбургер
+cheese Gruyere,сыр Грюйер
+cheese Emmental,сыр Эмменталь
+cheese Cheddar,сыр Чеддер
+cheese Bluefort,сыр Дор Блю
+cheese sheep,сыр овечий
+cheese smoked,сыр копченый
+cheese Rambol,сыр Рамболь
+cheese Stilton,сыр Стилтон
+cheese goat,сыр козий
+cheese Bel Paese,сыр Бель-паэзе
+cheese Gorgonzola,сыр Горгондзола
+cheese Mozzarella,сыр Моцарелла
+Mascarpone cheese,сыр Маскарпоне
+cheese Feta,сыр Фета
+cheese Ricotta,сыр Рикотта
+parsley,петрушка
+stock cubes,бульонные кубики
+tamarind,тамаринд
+shrimp paste,креветочная паста
+pepper black,перец черный
+pepper white,перец белый
+cinnamon,корица
+cumin seed,семена тмина
+cloves,гвоздика
+chives,лук зеленый
+chervil,кервель
+ginger root,корень имбиря
+basil,базилик
+marjoram,майоран
+oregano,орегано
+paprika,паприка
+rosemary,розмарин
+horseradish,хрен
+mint,мята
+sauce oyster,соус устричный
+anise seed,семена аниса
+milk,молоко
+milk chocolate,молоко шоколадное
+chocolate,шоколад
+yoghurt,йогурт
+milk condensed,молоко сгущенное
+coffee,кофе
+buttermilk,простокваша
+ice cream,мороженое
+cottage cheese,творог
+blancmange,бланманже
+mousse,мусс
+mousse chocolate,мусс шоколадный
+cream sour,сметана
+milkshake,молочный коктейль
+kefir,кефир
+semolina,манная каша
+jelly,желе
+tiramisu,тирамису
+stracciatella,страчателла
+pudding,пудинг
+hot chocolate,горячий шоколад
+cream whipped,взбитые сливки
+skyr,скир
+yogurt greek,греческий йогурт
+juice apple,яблочный сок
+fruit juice,фруктовый сок
+juice,сок
+juice redcurrant,сок из красной смородины
+juice grape,виноградный сок
+juice orange,апельсиновый сок
+tomato juice,томатный сок
+tea,чай
+water,вода
+juice grapefruit,грейпфрутовый сок
+juice pear,грушевый сок
+juice pineapple,ананасовый сок
+beer alcohol free,пиво безалкогольное
+cola,кола
+juice carrot,морковный сок
+ice tea,холодный чай
+mineral water,минеральная вода
+sports drink,спортивный напиток
+juice multi-fruit,мультифруктовый сок
+smoothie,смузи
+energy drink,энергетический напиток
+coconut water,кокосовая вода
+almonds,миндаль
+cashew,кешью
+hazelnuts,фундук
+chestnuts,каштаны
+peanuts,арахис
+walnuts,грецкие орехи
+sesame,кунжута
+linseeds,семена льна
+pecan,пекан
+pistachio,фисташки
+pine nuts,кедровые орехи
+poppy,мака
+chia seeds,семена чиа
+chickpeas,нут
+olivier salad,оливье
+goulash,гуляш
+pancakes,блинчики
+ratatouille,рататуй
+shashlik,шашлык
+risotto,ризотто
+carbonara,паста карбонара
+soup,суп
+bouillon,бульон
+syrup,сироп
+chocolate milk,молочный шоколад
+chocolate,шоколад
+chocolate dark,темный шоколад
+chocolate butter,шоколадное масло
+ginger,имбирь
+honey,мед
+jam,варенье
+sweets,конфеты
+toffees,ириски
+marshmallows,зефир
+liquorice,лакрица
+marzipan,марципан
+Turkish Delight,рахат-лукум
+chocolate white,белый шоколад
+nougat,нуга
+meringue,безе
+jam apple,яблочное варенье
+muffin chocolate,маффин с шоколадом
+muffin,маффин
+lollipop,леденец
+oil peanut,арахисовое масло
+butter,масло
+oil soy,соевое масло
+lard,сало
+oil sunflower seed,подсолнечное масло
+oil olive,оливковое масло
+margarine,маргарин
+oil linseed,льняное масло
+oil coconut,кокосовое масло
+oil sesame,кунжутное масло
+oil palm,пальмовое масло
+mussels,мидии
+eel,угорь
+herring,сельдь
+mackerel,скумбрия
+crab,краб
+lobster,лобстер
+oysters,устрицы
+sardines,сардины
+codfish,треск
+stockfish,вяленая рыба
+salmon,лосось
+plaice,камбала
+fish fingers,рыбные палочки
+white fish fillet,филе белой рыбы
+caviar,икра чёрная
+squash caviar,кабачковая икра
+squid,кальмар
+snails,улитки
+squid rings,кольца кальмара
+halibut,палтус
+anchovy,анчоусы
+tuna,тунец
+sprats,шпроты
+trout,форель
+perch,окунь
+roe,икра
+surimi,сурими
+sturgeon,осетр
+prawns,креветки
+horse meat,конина
+mutton,баранина
+duck,утка
+chicken,курица
+rabbit,кролик
+pheasant,фазан
+turkey,индейка
+partridge,куропатка
+venison,оленина
+bacon,бекон
+beef,говядина
+cutlets,котлеты
+pork,свинина
+steak,стейк
+hamburger,гамбургер
+veal,телятина
+mincemeat,фарш
+tartare,тартар
+fillet,филе
+burger,бургер
+shawarma,шаурма
+rib eye steak,стейк рибай
+cream,сливки
+topping,топпинг
+seitan,сейтан
+pate,паштет
+ham,ветчина
+falafel,фалафель
+salami,салями
+saveloy,сервелат
+sausage cooked,вареная колбаса
+roastbeef,ростбиф
+foie gras,фуа-гра
+lamb,ягненок
+quail,перепелка
+corned beef,тушенка
+scallops,гребешки
+octopus,осьминог
+clams,моллюски
+foie gras,фуа-гра
+liverwurst,ливерная колбаса
+bologna,болонская колбаса
+brisket,грудинка
+tofu,тофу
+churros,чуррос
+sushi roll,суши роллы
+wasabi,васаби
+teriyaki sauce,соус терияки
+dorado,дорадо
+carp,карп
+dumplings,пельмени

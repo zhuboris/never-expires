@@ -1,0 +1,48 @@
+name: Docker build Notification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  docker:
+    name: Docker build Notification
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build docker image
+        run: docker build -t notifications_sender -f ./build/reminder/apns/sender/Dockerfile .
+      - name: Set job result message
+        id: set_result
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "result_message=:hugging_face: Success" >> $GITHUB_ENV
+          else
+            echo "result_message=:hushed: Failure" >> $GITHUB_ENV
+          fi
+      - name: Send custom JSON data to Slack workflow
+        id: slack
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Workflow *${{ github.workflow }}* - Result: *${{ job.status }}*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Workflow:* ${{ github.workflow }}\n*Result:* ${{ env.result_message }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

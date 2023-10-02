@@ -1,0 +1,104 @@
+version: '3.8'
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ../../build/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    volumes:
+      - ../../build/monitoring/prometheus/alertmanager:/etc/alertmanager:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+      - /run/udev/data:/run/udev/data:ro
+      - /:/rootfs:ro
+      - ../notification/metrics:/var/notification/metrics:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.systemd'
+      - '--collector.processes'
+      - '--collector.conntrack'
+      - '--collector.stat'
+      - '--collector.tcpstat'
+      - '--collector.textfile.directory=/var/notification/metrics'
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    command:
+      - "-nginx.scrape-uri=http://nginx:8080/stub_status"
+    networks:
+      - nginx_ednetwork
+
+  postgres_id_api_exporter:
+    image: bitnami/postgres-exporter:latest
+    env_file:
+      - ../../build/monitoring/prometheus/db_id.env
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  postgres_reminder_exporter:
+    image: bitnami/postgres-exporter:latest
+    env_file:
+      - ../../build/monitoring/prometheus/db_reminder.env
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  blackbox_exporter:
+    image: prom/blackbox-exporter
+    volumes:
+      - ../../build/monitoring/prometheus/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+       - '--config.file=/etc/blackbox_exporter/config.yml'
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+
+  grafana:
+    image: grafana/grafana:main-ubuntu
+    env_file:
+      - ../../build/monitoring/grafana/.env
+    volumes:
+      - ../../build/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana-storage:/var/lib/grafana
+      - ./grafana_log:/var/log/grafana
+    restart: unless-stopped
+    networks:
+      - nginx_ednetwork
+    depends_on:
+      - prometheus
+
+networks:
+  nginx_ednetwork:
+    external: true

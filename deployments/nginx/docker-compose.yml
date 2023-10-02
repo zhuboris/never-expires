@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:1.24.0-alpine3.17
+    volumes:
+      - ../../build/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../build/nginx/ssl.conf:/etc/nginx/ssl.conf:ro
+      - ./access.log:/etc/nginx/log/access.log
+      - ./error.log:/etc/nginx/log/error.log
+      - ./cache/:/etc/nginx/cache
+      - ../../web/public/:/var/www/public/:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    command: /bin/sh -c "nginx -g 'daemon off;'"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ednetwork
+    restart: always
+
+  certbot:
+    build:
+      context: ../../build/nginx/certbot
+      dockerfile: Dockerfile
+    volumes:
+      - ../../build/nginx/certbot/regru.ini:/etc/letsencrypt/regru.ini
+      - /etc/letsencrypt:/etc/letsencrypt
+    restart: always
+
+networks:
+  ednetwork:
+    driver: bridge

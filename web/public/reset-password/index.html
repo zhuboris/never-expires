@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reset Password</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+    }
+
+    #resetForm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+      align-items: center;
+    }
+
+    .input-group {
+      display: block;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-group div {
+      width: 100%;
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-left: 10px;
+      width: 30%;
+      text-align: right;
+    }
+
+    input[type="password"] {
+      width: 90%;
+      padding: 10px;
+    }
+
+    button[type="submit"] {
+      padding: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+<form id="resetForm">
+  <h1>Reset Password</h1>
+  <div class="input-group">
+    <div>
+      <input type="password" id="newPassword" placeholder="New Password" required>
+    </div>
+    <p id="passwordError" class="error"></p>
+  </div>
+  <div class="input-group">
+    <div>
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+    </div>
+    <p id="confirmError" class="error"></p>
+  </div>
+  <button type="submit" disabled>Reset Password</button>
+</form>
+
+<script>
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+  const newPasswordInput = document.getElementById('newPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const passwordError = document.getElementById('passwordError');
+  const confirmError = document.getElementById('confirmError');
+  const submitButton = document.querySelector('button[type="submit"]');
+
+  function checkPasswords() {
+    const newPassword = newPasswordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    let valid = true;
+
+    if (newPassword && !passwordPattern.test(newPassword)) {
+      passwordError.textContent = 'Include upper, lower, digit, special char.';
+      valid = false;
+    } else {
+      passwordError.textContent = '';
+    }
+
+    if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+      confirmError.textContent = 'Passwords do not match!';
+      valid = false;
+    } else {
+      confirmError.textContent = '';
+    }
+
+    submitButton.disabled = !valid;
+  }
+
+  newPasswordInput.addEventListener('input', checkPasswords);
+  confirmPasswordInput.addEventListener('input', checkPasswords);
+
+  document.getElementById('resetForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const newPassword = newPasswordInput.value;
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    console.log(newPasswordInput, newPasswordInput.value);
+    console.log(token);
+
+    fetch("http://localhost/reset-password/", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        password: newPassword,
+        token: token,
+      }),
+    })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert('Password reset successful');
+              } else {
+                alert('Error resetting password');
+              }
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+  });
+</script>
+</body>
+</html>
