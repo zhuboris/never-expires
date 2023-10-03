@@ -52,7 +52,13 @@ This dashboard tracks distinct custom metrics like count of processed bad reques
 <details>
   <summary><b>Some visualizations in Grafana</b></summary>
     <div>
-        <img alt='Screenshot' src='https://never-expires.com/images/grafana_reminder.jpg'/>
+        <img alt='grafana_example' src='https://never-expires.com/images/grafana_reminder.jpg'/>
+    </div>
+</details>
+<details>
+  <summary><b>CI output  into slack example</b></summary>
+    <div>
+        <img alt='ci_slack_example' src='https://i.postimg.cc/cLnw4mzy/ci-slack-output.jpg'/>
     </div>
 </details>
 
